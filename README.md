@@ -11,7 +11,7 @@ In order for me to host MM3, I need the repo that **I** control on github.
 <br>So this is it!
 
 ## Changes
-- [x] Changed all the gibberish to text
+- [x] Changed all the gibberish to emojis
 ```
 - âš”  = ⚔
 - ðŸ’Ž = 💎
@@ -19,7 +19,7 @@ In order for me to host MM3, I need the repo that **I** control on github.
 - ðŸŽ© = 🎩
 ```
 - [x] Updated code for ECMAScript6
-```
+```javascript
 - var = let
 - "txt"+value+"txt" = `txt${value}txt`
 ```
