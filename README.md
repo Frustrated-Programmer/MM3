@@ -25,3 +25,5 @@ var = let
 ```
 - [x] Fixed bug when game wouldn't announce it was day
 - [ ] Upload Bot to server
+- [ ] Change messages to Embeds
+- [ ] Clean up help messages
