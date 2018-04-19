@@ -13,15 +13,15 @@ In order for me to host MM3, I need the repo that **I** control on github.
 ## Changes
 - [x] Changed all the gibberish to emojis
 ```
-- âš”  = ⚔
-- ðŸ’Ž = 💎
-- ðŸ›¡ = 🛡
-- ðŸŽ© = 🎩
+âš”  = ⚔
+ðŸ’Ž = 💎
+ðŸ›¡ = 🛡
+ðŸŽ© = 🎩
 ```
 - [x] Updated code for ECMAScript6
 ```javascript
-- var = let
-- "txt"+value+"txt" = `txt${value}txt`
+var = let
+"txt"+value+"txt" = `txt${value}txt`
 ```
 - [x] Fixed bug when game wouldn't announce it was day
 - [ ] Upload Bot to server
