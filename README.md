@@ -11,17 +11,17 @@ In order for me to host MM3, I need the repo that **I** control on github.
 <br>So this is it!
 
 ## Changes
-[x] Changed all the gibberish to text
+- [x] Changed all the gibberish to text
 ```
 - âš”  = ⚔
 - ðŸ’Ž = 💎
 - ðŸ›¡ = 🛡
 - ðŸŽ© = 🎩
 ```
-[x] Updated code for ECMAScript6
+- [x] Updated code for ECMAScript6
 ```
 - var = let
 - "txt"+value+"txt" = `txt${value}txt`
 ```
-[x] Fixed bug when game wouldn't announce it was day
-[ ] Upload Bot to server
+- [x] Fixed bug when game wouldn't announce it was day
+- [ ] Upload Bot to server
