@@ -1,4 +1,4 @@
-#Mausoleum Mansion 3 (Clone)
+# Mausoleum Mansion 3 (Clone)
 Find the original at [MM3](https://github.com/TemporalFuzz/mm3)<br>
 Owner of MM3 is [TemporalFuzz](https://github.com/TemporalFuzz)<br>
 
@@ -10,7 +10,7 @@ Could host MM3 for others.
 In order for me to host MM3, I need the repo that **I** control on github.
 <br>So this is it!
 
-##Changes
+## Changes
 [x] Changed all the gibberish to text
 ```
 - âš”  = ⚔
