@@ -20,7 +20,7 @@ In order for me to host MM3, I need the repo that **I** control on github.
 ðŸ‘¥ = 🗳
 ```
 - [x] Updated code for ECMAScript6
-```javascript
+```
 var = let
 "txt"+value+"txt" = `txt${value}txt`
 ```
@@ -30,3 +30,5 @@ var = let
 - [x] Clean up help messages
 - [x] Change how the chat system is displayed
 - [x] Added a better help system
+- [x] Alphabetized the commands
+- [x] Added new command `.roles` to see roles you can select
