@@ -1,6 +1,7 @@
 # Mausoleum Mansion 3 (Clone)
 Find the original at [MM3](https://github.com/TemporalFuzz/mm3)<br>
 Owner of MM3 is [TemporalFuzz](https://github.com/TemporalFuzz)<br>
+[Invite the bot](https://discordapp.com/oauth2/authorize?client_id=432560868442767360&scope=bot&permissions=2080374975)<br>
 
 TemporalFuzz decided to not host MM3 anymore.<br>
 But Due to popular requests he made MM3 open source so others ~~like me~~<br>
