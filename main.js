@@ -26,10 +26,11 @@ function sendEmbed(channel, content, color, title) {
 	let embed = new Discord.RichEmbed()
 		.setColor(color)
 		.setDescription(content);
-	if (title) embed.setTitle(title);
+	if (title.length) embed.setTitle(title);
 	channel.send(useEmbed ? {embed} : `**${title}**\n${content}`);
 }
 let prefixes = {};
+
 
 importJSON = function () {
 	fs.readFile(`userdata.json`, `utf8`, function (err, data) {
@@ -709,7 +710,7 @@ let cards = [
 		cost    : 8,
 		instant : false,
 		priority: 1,
-		desc    : `Target has 0 ðŸ‘¥ Vote Strength tomorrow.`,
+		desc    : `Target has 0 🗳 Vote Strength tomorrow.`,//todo fix this gibberish
 		effect  : function (user, target) {
 			target.voteStrength = -Infinity;
 			target.send(`You've been nullified! Your vote is worthless tomorrow!`, `bad`);
@@ -721,10 +722,10 @@ let cards = [
 		cost    : 7,
 		instant : false,
 		priority: 1,
-		desc    : `Target loses 1 ðŸ‘¥ Vote Strength tomorrow.`,
+		desc    : `Target loses 1 🗳 Vote Strength tomorrow.`,
 		effect  : function (user, target) {
 			target.voteStrength = -Infinity;
-			target.send(`You've been rendered powerless! -1 ðŸ‘¥ Vote Strength tomorrow!`, `bad`);
+			target.send(`You've been rendered powerless! -1 🗳 Vote Strength tomorrow!`, `bad`);
 		}
 	},
 	{//#50 - endorse
@@ -733,10 +734,10 @@ let cards = [
 		cost    : 7,
 		instant : false,
 		priority: 1,
-		desc    : `Target gains 1 ðŸ‘¥ Vote Strength tomorrow.`,
+		desc    : `Target gains 1 🗳 Vote Strength tomorrow.`,
 		effect  : function (user, target) {
 			target.voteStrength++;
-			target.send(`You've been endorsed! +1 ðŸ‘¥ Vote Strength tomorrow!`, `good`);
+			target.send(`You've been endorsed! +1 🗳 Vote Strength tomorrow!`, `good`);
 		}
 	},
 	{//#51 - influence
@@ -745,7 +746,7 @@ let cards = [
 		cost    : 8,
 		instant : true,
 		priority: 1,
-		desc    : `+1 ðŸ‘¥ Vote Strength tomorrow.`,
+		desc    : `+1 🗳 Vote Strength tomorrow.`,
 		effect  : function (user) {
 			user.voteStrength++;
 		}
@@ -756,10 +757,10 @@ let cards = [
 		cost    : 0,
 		instant : false,
 		priority: 0,
-		desc    : `Target has exactly 1 ðŸ‘¥ Vote Strength tomorrow. Overrides Nullify.`,
+		desc    : `Target has exactly 1 🗳 Vote Strength tomorrow. Overrides Nullify.`,
 		effect  : function (user, target) {
 			target.voteStrength = -Infinity;
-			target.send(`You've been equalized! Exactly 1 ðŸ‘¥ Vote Strength tomorrow!`, `info`);
+			target.send(`You've been equalized! Exactly 1 🗳 Vote Strength tomorrow!`, `info`);
 		}
 	},
 	{//#53 - love
