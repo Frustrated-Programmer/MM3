@@ -17,6 +17,7 @@ In order for me to host MM3, I need the repo that **I** control on github.
 ðŸ’Ž = 💎
 ðŸ›¡ = 🛡
 ðŸŽ© = 🎩
+ðŸ‘¥ = 🗳
 ```
 - [x] Updated code for ECMAScript6
 ```javascript
