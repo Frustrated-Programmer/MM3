@@ -974,6 +974,20 @@ let roles = {
 		voteStrength: 1,
 		defense     : 0
 	},
+	sheriff     : {
+		faction     : `guest`,
+		subclass    : `investigative`,
+		deck        : [47, 47, 47, 47, 47, 47, 1, 1, 2, 2, 4, 4, 45, 45, 5, 18],
+		voteStrength: 1,
+		defense     : 0
+	},
+	lawyer      : {
+		faction     : `guest`,
+		subclass    : `support`,
+		deck        : [20, 20, 20, 20, 5, 5, 5, 51, 51, 51, 4, 50, 48, 49],
+		voteStrength: 2,
+		defense     : 0
+	},
 	ringleader  : {
 		faction     : `impostor`,
 		subclass    : `killing`,
@@ -988,39 +1002,11 @@ let roles = {
 		voteStrength: 1,
 		defense     : 0
 	},
-	lawyer      : {
-		faction     : `guest`,
-		subclass    : `support`,
-		deck        : [20, 20, 20, 20, 5, 5, 5, 51, 51, 51, 4, 50, 48, 49],
-		voteStrength: 2,
-		defense     : 0
-	},
 	prosecutor  : {
 		faction     : `impostor`,
 		subclass    : `deception`,
 		deck        : [20, 20, 20, 20, 19, 19, 19, 7, 7, 7, 17, 17, 5, 6, 49, 51],
 		voteStrength: 2,
-		defense     : 0
-	},
-	maw         : {
-		faction     : `neutral`,
-		subclass    : `killing`,
-		deck        : [40, 40, 40, 40, 27, 27, 27, 41, 41, 4, 4, 5, 6, 29, 42],
-		voteStrength: 1,
-		defense     : 0
-	},
-	eternal     : {
-		faction     : `neutral`,
-		subclass    : `benign`,
-		deck        : [27, 27, 27, 27, 27, 20, 20, 20, 3, 3, 4, 4, 42, 42, 1, 38],
-		voteStrength: 1,
-		defense     : 0
-	},
-	trickster   : {
-		faction     : `neutral`,
-		subclass    : `evil`,
-		deck        : [46, 46, 46, 46, 20, 20, 20, 4, 4, 42, 42, 55, 55, 19, 27, 54],
-		voteStrength: 1,
 		defense     : 0
 	},
 	thug        : {
@@ -1034,13 +1020,6 @@ let roles = {
 		faction     : `impostor`,
 		subclass    : `support`,
 		deck        : [51, 51, 51, 51, 51, 51, 19, 19, 19, 20, 20, 42, 42, 4, 5, 6, 17],
-		voteStrength: 1,
-		defense     : 0
-	},
-	sheriff     : {
-		faction     : `guest`,
-		subclass    : `investigative`,
-		deck        : [47, 47, 47, 47, 47, 47, 1, 1, 2, 2, 4, 4, 45, 45, 5, 18],
 		voteStrength: 1,
 		defense     : 0
 	},
@@ -1064,7 +1043,28 @@ let roles = {
 		deck        : [60, 60, 60, 61, 61, 61, 65, 65, 65, 20, 20, 56, 56, 57, 58, 64],
 		voteStrength: 1,
 		defense     : 0
-	}
+	},
+	maw         : {
+		faction     : `neutral`,
+		subclass    : `killing`,
+		deck        : [40, 40, 40, 40, 27, 27, 27, 41, 41, 4, 4, 5, 6, 29, 42],
+		voteStrength: 1,
+		defense     : 0
+	},
+	eternal     : {
+		faction     : `neutral`,
+		subclass    : `benign`,
+		deck        : [27, 27, 27, 27, 27, 20, 20, 20, 3, 3, 4, 4, 42, 42, 1, 38],
+		voteStrength: 1,
+		defense     : 0
+	},
+	trickster   : {
+		faction     : `neutral`,
+		subclass    : `evil`,
+		deck        : [46, 46, 46, 46, 20, 20, 20, 4, 4, 42, 42, 55, 55, 19, 27, 54],
+		voteStrength: 1,
+		defense     : 0
+	},
 };
 
 roleGroups = {
@@ -1933,6 +1933,16 @@ setInterval(function () {
 }, 1000);
 
 let commands = [
+	{//account
+		names     : [`account`, `myaccount`, `myinfo`, `profile`],
+		desc      : `View your account.`,
+		tags      : [`account`, `info`, `setup`],
+		conditions: [{get: acc.has, message: `You don't have an account! Use the register command`}],
+		effect    : function (message, args) {
+			let yourAccount = Account.findFromUserID(message.author.id);
+			sendEmbed(message.channel, `**#${yourAccount.ID}** - ${yourAccount.gems} 💎 | ${yourAccount.wins}W, ${yourAccount.losses}L | ${yourAccount.getWinrate().toFixed(3)} W/L`, colors.aqua);
+		}
+	},
 	{//addrole
 		names     : [`arole`, `addrole`, `addroles`, `aroles`],
 		desc      : `Add a role to your party's list. Used \`.addrole (ROLE)\``,
@@ -1964,6 +1974,51 @@ let commands = [
 			}
 			yourParty.addRoles(rolesToAdd);
 			sendEmbed(message.channel, `Role${rolesToAdd.length > 1 ? `s` : ``} added!`, colors.green);
+		}
+	},
+	{//cardinfo
+		names     : [`cardinfo`, `card`, `cinfo`],
+		desc      : `See the details of a card. Used \`.cardinfo (CARD)\``,
+		tags      : [`setup`, `info`, `open`],
+		conditions: [{get: arg.exists(0), message: `Invalid card.`}],
+		effect    : function (message, args) {
+			let yourCard = null, yourIndex = null;
+			if (isNaN(parseInt(args[0]))) {
+				for (let i = 0; i < cards.length; i++) {
+					if (cards[i].name === args[0].toLowerCase()) {
+						yourCard = cards[i];
+						yourIndex = i;
+					}
+				}
+			}
+			else if (cards[parseInt(args[0])]) {
+				yourCard = cards[parseInt(args[0])];
+				yourIndex = parseInt(args[0]);
+			}
+			if (yourCard) {
+				sendEmbed(message.channel, `**#${yourIndex} ${capitalize(yourCard.name)}** - ${yourCard.cost} 🎩 - ${(yourCard.instant ? `Instant` : `Visit`) + (yourCard.rare ? ` [RARE]` : ``)}\n${yourCard.desc}`, colors.purple);
+			}
+			else {
+				sendEmbed(message.channel, `Invalid card.`, colors.red);
+			}
+		}
+	},
+	{//changeprefix
+		names     : [`changeprefix`, `setprefix`, `prefix`],
+		desc      : `Set the server prefix`,
+		tags      : [`info`, `admin`],
+		conditions: [{
+			get    : clearance.hasPerm(`ADMINISTRATOR`),
+			message: `You must be a server admin to use this command!`
+		}],
+		effect    : function (message, args) {
+			if (args[0].length < 5) {
+				prefixes[message.guild.id] = args[0];
+				sendEmbed(message.channel, `Prefix set to ${args[0]}`, colors.purple);
+				exportPrefixData();
+				return;
+			}
+			sendEmbed(message.channel, `Prefix cannot be over 4 characters.`, colors.red);
 		}
 	},
 	{//clear
@@ -2011,6 +2066,20 @@ let commands = [
 			sendEmbed(message.channel, `Party closed!`, colors.red);
 		}
 	},
+	{//clearroles
+		names     : [`croles`, `clearroles`],
+		desc      : `Clear your party's role list`,
+		tags      : [`setup`, `host`, `open`],
+		conditions: [
+			{get: acc.has, message: `You don't have an account! Use the register command`},
+			{get: acc.isHost, message: `You're not the host of a party!`}
+		],
+		effect    : function (message, args) {
+			let yourParty = Party.findFromMemberUserID(message.author.id);
+			yourParty.clearRoles();
+			sendEmbed(message.channel, `All roles removed!`, colors.green);
+		}
+	},
 	{//exit
 		names     : [`exit`],
 		desc      : `Turn off the bot. TemporalFuzz only.`,
@@ -2018,6 +2087,25 @@ let commands = [
 		conditions: [{get: clearance.isOwner, message: `This command is only usable by TemporalFuzz!`}],
 		effect    : function (message, args) {
 			process.exit();
+		}
+	},
+	{//hand
+		names     : [`hand`],
+		desc      : `View your hand in the game`,
+		tags      : [`game`, `info`],
+		conditions: [
+			{get: acc.has, message: `You don't have an account! Use the register command`},
+			{get: acc.inGame, message: `You aren't in a game!`},
+			{get: channel.isDM, message: `You can only use this command in a DM channel.`}
+		],
+		effect    : function (message, args) {
+			let yourPlayer = Player.findFromUserID(message.author.id);
+			let yourResponse = `${yourPlayer.intellect} 🎩 - Hand:`;
+			for (let i = 0; i < yourPlayer.hand.length; i++) {
+				let yourCard = cards[yourPlayer.hand[i]];
+				yourResponse += `\n**${(i + 1)})** #${yourPlayer.hand[i]} - ${capitalize(yourCard.name)} - ${yourCard.cost} 🎩 - ${yourCard.desc}`;
+			}
+			yourPlayer.send(yourResponse, `info`);
 		}
 	},
 	{//help
@@ -2226,212 +2314,6 @@ let commands = [
 			sendEmbed(message.channel, yourResponse, colors.aqua);
 		}
 	},
-	{//playerlist
-		names     : [`playerlist`, `party`, `plist`, `game`],
-		desc      : `See details about your party.`,
-		tags      : [`setup`, `open`],
-		conditions: [{get: acc.has, message: `You don't have an account! Use the register command`}],
-		effect    : function (message, args) {
-			if (acc.inParty(message)) {
-				let yourParty = Party.findFromMemberUserID(message.author.id);
-				let yourResponse = `**#${yourParty.ID}** - **${yourParty.members.length}** Member${(yourParty.members.length === 1 ? `` : `s`)} (out of 10) - Party Members:`;
-
-				for (let i = 0; i < yourParty.members.length; i++) {
-					yourResponse += `\n${(i + 1)}) **#${yourParty.members[i]}** - ${client.users.get(Account.findFromID(yourParty.members[i]).userID).username + i === 0 ? ` [HOST]` : ``}`;
-				}
-				sendEmbed(message.channel, yourResponse, colors.green);
-			}
-			else if (acc.inGame(message)) {
-				let yourGame = Game.findFromPlayerUserID(message.author.id);
-				let yourResponse = `Game - ${yourGame.players.length} Players:`;
-
-				for (let i = 0; i < yourGame.players.length; i++) {
-					yourResponse += `\n${(i + 1)}) **#${yourGame.players[i].ID}**${yourGame.players[i].alive ? `` : `[DEAD]`}`;
-				}
-				sendEmbed(message.channel, yourResponse, colors.red);
-			}
-			else {
-				sendEmbed(message.channel, `You're not in a game or party!`, colors.yellow);
-			}
-		}
-	},
-	{//register
-		names     : [`register`],
-		desc      : `Make an account!`,
-		tags      : [`account`, `setup`],
-		conditions: [
-			{get: acc.none, message: `You already have an account!`}
-		],
-		effect    : function (message, args) {
-			let yourAccount = new Account({userID: message.author.id});
-			sendEmbed(message.channel, `Account created! Your generated ID is: **#${yourAccount.generateID()}**!`, colors.green);
-			accounts.push(yourAccount);
-			exportAccountData();
-		}
-	},
-
-	{//removeroles
-		names     : [`rrole`, `removerole`, `removeroles`, `rroles`],
-		desc      : `Remove a role from your party's list. Used \`.removeroles (ROLENUMS)\``,
-		tags      : [`setup`, `host`, `open`],
-		conditions: [
-			{get: acc.has, message: `You don't have an account! Use the register command`},
-			{get: acc.isHost, message: `You're not the host of a party!`}
-		],
-		effect    : function (message, args) {
-			let yourParty = Party.findFromMemberUserID(message.author.id);
-			let rolesToRemove = [];
-			for (let i = 0; i < args.length; i++) {
-				if (isNaN(parseInt(args[i]))) {
-					sendEmbed(message.channel, `Invalid Role ID: ${args[i]} - No roles removed.`, colors.yellow);
-					return;
-				}
-				if (parseInt(args[i]) <= yourParty.rolelist.length && parseInt(args[i]) > 0) {
-					rolesToRemove.push(parseInt(args[i]) - 1);
-				}
-				else {
-					sendEmbed(message.channel, `Invalid Role ID: ${args[i]} - No roles removed.`, colors.yellow);
-					return;
-				}
-			}
-			yourParty.removeRoles(rolesToRemove);
-			sendEmbed(message.channel, `Roles removed!`, colors.aqua);
-		}
-	},
-	{//clearroles
-		names     : [`croles`, `clearroles`],
-		desc      : `Clear your party's role list`,
-		tags      : [`setup`, `host`, `open`],
-		conditions: [
-			{get: acc.has, message: `You don't have an account! Use the register command`},
-			{get: acc.isHost, message: `You're not the host of a party!`}
-		],
-		effect    : function (message, args) {
-			let yourParty = Party.findFromMemberUserID(message.author.id);
-			yourParty.clearRoles();
-			sendEmbed(message.channel, `All roles removed!`, colors.green);
-		}
-	},
-	{//rolelist
-		names     : [`rolelist`, `rlist`],
-		desc      : `View your party's role list`,
-		tags      : [`setup`, `open`, `info`],
-		conditions: [{get: acc.has, message: `You don't have an account! Use the register command`}],
-		effect    : function (message, args) {
-			let yourParty = Party.findFromMemberUserID(message.author.id);
-			if (!yourParty) {
-				let yourGame = Game.findFromPlayerUserID(message.author.id);
-				let yourResponse = `**Game Rolelist:**`;
-				if (!yourGame) {
-					sendEmbed(message.channel, `You aren't in a game or party!`, colors.red);
-					return;
-				}
-				for (let i = 0; i < yourGame.rolelist.length; i++) {
-					yourResponse += `\n${(i + 1)}) ${capitalize(yourGame.rolelist[i])}`;
-				}
-				sendEmbed(message.channel, yourResponse, colors.purple);
-				return;
-			}
-			if (yourParty.rolelist.length === 0) {
-				sendEmbed(message.channel, `No roles listed!`, colors.red);
-				return;
-			}
-			let yourResponse = `**#${yourParty.ID}** - Roles:`;
-			for (let i = 0; i < yourParty.rolelist.length; i++) {
-				yourResponse += `\n${(i + 1)}) ${capitalize(yourParty.rolelist[i])}`;
-			}
-			sendEmbed(message.channel, yourResponse, colors.purple);
-		}
-	},
-	{//start
-		names     : [`start`, `startgame`, `sgame`],
-		desc      : `Start your party's game!`,
-		tags      : [`setup`, `host`, `open`],
-		conditions: [
-			{get: acc.has, message: `You don't have an account! Use the register command`},
-			{get: acc.isHost, message: `You're not the host of a party.`},
-			{get: acc.noGame, message: `You can't use this command while in a game.`}
-		],
-		effect    : function (message, args) {
-			let yourParty = Party.findFromMemberUserID(message.author.id);
-			if (yourParty.rolelist.length !== yourParty.members.length) {
-				sendEmbed(message.channel, `The number of roles must be equal to the number of players to start!`, colors.yellow);
-				return;
-			}
-			let players = [], rlist = yourParty.rolelist.slice();
-			while (yourParty.members.length > 0) {
-				let n = yourParty.members.length;
-				players.push(new Player(Account.findFromID(yourParty.members.splice(Math.floor(Math.random() * yourParty.members.length), 1)[0]), n));
-			}
-			while (yourParty.rolelist.length > 0) {
-				let n = yourParty.rolelist.length - 1;
-				players[n].assignRole(yourParty.rolelist.splice(Math.floor(Math.random() * yourParty.rolelist.length), 1)[0]);
-			}
-
-			let yourGame = new Game(players, rlist);
-			for (let i = 0; i < yourGame.players.length; i++) {
-				yourGame.players[i].send(`The game has started! You are player **#${yourGame.players[i].ID}**, and your role is **${capitalize(yourGame.players[i].rolename)}**.`, `gameStart`);
-			}
-			games.push(yourGame);
-			yourParty.kill();
-			sendEmbed(message.channel, `Party closed, game started!`, colors.green);
-		}
-	},
-	{//say
-		names     : [`say`, `s`],
-		desc      : `Talk in the game chat! Used \`.say (MSG)\``,
-		tags      : [`game`, `action`],
-		conditions: [
-			{get: acc.has, message: `You don't have an account! Use the register command`},
-			{get: acc.inGame, message: `You aren't in a game!`},
-			{get: channel.isDM, message: `You can only use this command in a DM channel.`},
-			{get: arg.exists(0), message: `You can't send an empty message!`}
-		],
-		effect    : function (message, args) {
-			let yourGame = Game.findFromPlayerUserID(message.author.id);
-			let yourPlayer = yourGame.playerFromUserID(message.author.id);
-			if (yourGame.phase() === `night`) {
-				sendEmbed(message.author, `You can't talk during the night!`, colors.red);
-				return;
-			}
-			if (!yourPlayer.alive) {
-				sendEmbed(message.author, `You can't talk while dead!`, colors.darkRed);
-				return;
-			}
-			let msg = args.join(` `);
-			if (yourPlayer.silenced) {
-				msg = `I am silenced.`
-			}
-			for (let i = 0; i < yourGame.players.length; i++) {
-				console.log(`i: `,i);
-				yourGame.players[i].send(`**#${yourGame.playerFromUserID(message.author.id).ID}**: ${msg}`, `chat`);
-			}
-			yourGame.chat.push(`**#${yourGame.playerFromUserID(message.author.id).ID}**: ${msg}`);
-			if (yourGame.chat.length > 50) {
-				yourGame.chat.shift();
-			}
-
-		}
-	},
-	{//hand
-		names     : [`hand`],
-		desc      : `View your hand in the game`,
-		tags      : [`game`, `info`],
-		conditions: [
-			{get: acc.has, message: `You don't have an account! Use the register command`},
-			{get: acc.inGame, message: `You aren't in a game!`},
-			{get: channel.isDM, message: `You can only use this command in a DM channel.`}
-		],
-		effect    : function (message, args) {
-			let yourPlayer = Player.findFromUserID(message.author.id);
-			let yourResponse = `${yourPlayer.intellect} 🎩 - Hand:`;
-			for (let i = 0; i < yourPlayer.hand.length; i++) {
-				let yourCard = cards[yourPlayer.hand[i]];
-				yourResponse += `\n**${(i + 1)})** #${yourPlayer.hand[i]} - ${capitalize(yourCard.name)} - ${yourCard.cost} 🎩 - ${yourCard.desc}`;
-			}
-			yourPlayer.send(yourResponse, `info`);
-		}
-	},
 	{//play
 		names     : [`play`, `playcard`, `target`, `p`],
 		desc      : `Play the a card in your hand. Used \`.play (CARD) [TARGET]\``,
@@ -2519,6 +2401,271 @@ let commands = [
 			}
 		}
 	},
+	{//player
+		names     : [`player`, `gameinfo`, `me`],
+		desc      : `See your in-game summary.`,
+		tags      : [`game`, `info`],
+		conditions: [
+			{get: acc.has, message: `You don't have an account! Use the register command`},
+			{get: acc.inGame, message: `You aren't in a game!`},
+			{get: channel.isDM, message: `You can only use this command in a DM channel.`}
+		],
+		effect    : function (message, args) {
+			let yourPlayer = Player.findFromUserID(message.author.id);
+			let str = `**#${yourPlayer.ID}** - **${capitalize(yourPlayer.rolename)}**`;
+			if (yourPlayer.role.faction === `impostor`) {
+				str += `\n\nImpostors:`;
+				let yourGame = Game.findFromPlayerID(yourPlayer.account.ID);
+				for (let i = 0; i < yourGame.players.length; i++) {
+					if (yourGame.players[i].role.faction === `impostor`) {
+						str += `\n**#${yourGame.players[i].ID}** - **${yourGame.players[i].rolename}**`;
+					}
+				}
+			}
+			sendEmbed(message.channel, str, colors.purple);
+		}
+	},
+	{//playerlist
+		names     : [`playerlist`, `party`, `plist`, `game`],
+		desc      : `See details about your party.`,
+		tags      : [`setup`, `open`],
+		conditions: [{get: acc.has, message: `You don't have an account! Use the register command`}],
+		effect    : function (message, args) {
+			if (acc.inParty(message)) {
+				let yourParty = Party.findFromMemberUserID(message.author.id);
+				let yourResponse = `**#${yourParty.ID}** - **${yourParty.members.length}** Member${(yourParty.members.length === 1 ? `` : `s`)} (out of 10) - Party Members:`;
+
+				for (let i = 0; i < yourParty.members.length; i++) {
+					yourResponse += `\n${(i + 1)}) **#${yourParty.members[i]}** - ${client.users.get(Account.findFromID(yourParty.members[i]).userID).username + i === 0 ? ` [HOST]` : ``}`;
+				}
+				sendEmbed(message.channel, yourResponse, colors.green);
+			}
+			else if (acc.inGame(message)) {
+				let yourGame = Game.findFromPlayerUserID(message.author.id);
+				let yourResponse = `Game - ${yourGame.players.length} Players:`;
+
+				for (let i = 0; i < yourGame.players.length; i++) {
+					yourResponse += `\n${(i + 1)}) **#${yourGame.players[i].ID}**${yourGame.players[i].alive ? `` : `[DEAD]`}`;
+				}
+				sendEmbed(message.channel, yourResponse, colors.red);
+			}
+			else {
+				sendEmbed(message.channel, `You're not in a game or party!`, colors.yellow);
+			}
+		}
+	},
+	{//register
+		names     : [`register`],
+		desc      : `Make an account!`,
+		tags      : [`account`, `setup`],
+		conditions: [
+			{get: acc.none, message: `You already have an account!`}
+		],
+		effect    : function (message, args) {
+			let yourAccount = new Account({userID: message.author.id});
+			sendEmbed(message.channel, `Account created! Your generated ID is: **#${yourAccount.generateID()}**!`, colors.green);
+			accounts.push(yourAccount);
+			exportAccountData();
+		}
+	},
+	{//roles
+		names:[`roles`,`roleslist`,`rslist`],
+		desc:`View all the chooseable roles`,
+		tags:[`setup`,`open`,`info`],
+		conditions:[{get: acc.has, message: `You don't have an account! Use the register command`}],
+		effect:function (message, args) {
+			let guests = ``;
+			let neutral = ``;
+			let impostor = ``;
+			for(let i = 0;i < Object.getOwnPropertyNames(roleGroups).length;i++){
+				let rolesArray = roleGroups[Object.getOwnPropertyNames(roleGroups)[i]];
+				let txt = `${Object.getOwnPropertyNames(roleGroups)[i]} {\n`;
+				let mode = Object.getOwnPropertyNames(roleGroups)[i].split(`-`)[0];
+				for(let j =0;j<rolesArray.length;j++){
+					txt+=`    ${rolesArray[j]}\n${j+1>=rolesArray.length ? `}\n` : ``}`;
+				}
+				switch (mode.toLowerCase()){
+					case `guest`:guests+=txt;break;
+					case `neutral`:neutral+=txt;break;
+					case `impostor`:impostor+=txt;break;
+				}
+			}
+			let embed = new Discord.RichEmbed()
+				.setTitle(`List of Roles:`)
+				.setColor(colors.orange)
+				.addField(`Guests`,`\`\`\`${guests}\`\`\``,true)
+				.addField(`Neutrals`,`\`\`\`${neutral}\n\n\u200b\`\`\``,true)
+				.addField(`Impostors`,`\`\`\`${impostor}\`\`\``,true);
+			let msg = `**List of Roles:**\n\n**Guests**\n\`\`\`${guests}\`\`\`\n**Neutrals**\n\`\`\`${neutral}\`\`\`\n**Impostors**\n\`\`\`${impostor}\`\`\``;
+			message.channel.send(useEmbed ? {embed} : msg);
+		}
+	},
+	{//rolelist
+		names     : [`rolelist`, `rlist`],
+		desc      : `View your party's role list`,
+		tags      : [`setup`, `open`, `info`],
+		conditions: [{get: acc.has, message: `You don't have an account! Use the register command`}],
+		effect    : function (message, args) {
+			let yourParty = Party.findFromMemberUserID(message.author.id);
+			if (!yourParty) {
+				let yourGame = Game.findFromPlayerUserID(message.author.id);
+				let yourResponse = `**Game Rolelist:**`;
+				if (!yourGame) {
+					sendEmbed(message.channel, `You aren't in a game or party!`, colors.red);
+					return;
+				}
+				for (let i = 0; i < yourGame.rolelist.length; i++) {
+					yourResponse += `\n${(i + 1)}) ${capitalize(yourGame.rolelist[i])}`;
+				}
+				sendEmbed(message.channel, yourResponse, colors.purple);
+				return;
+			}
+			if (yourParty.rolelist.length === 0) {
+				sendEmbed(message.channel, `No roles listed!`, colors.red);
+				return;
+			}
+			let yourResponse = `**#${yourParty.ID}** - Roles:`;
+			for (let i = 0; i < yourParty.rolelist.length; i++) {
+				yourResponse += `\n${(i + 1)}) ${capitalize(yourParty.rolelist[i])}`;
+			}
+			sendEmbed(message.channel, yourResponse, colors.purple);
+		}
+	},
+	{//removeroles
+		names     : [`rrole`, `removerole`, `removeroles`, `rroles`],
+		desc      : `Remove a role from your party's list. Used \`.removeroles (ROLENUMS)\``,
+		tags      : [`setup`, `host`, `open`],
+		conditions: [
+			{get: acc.has, message: `You don't have an account! Use the register command`},
+			{get: acc.isHost, message: `You're not the host of a party!`}
+		],
+		effect    : function (message, args) {
+			let yourParty = Party.findFromMemberUserID(message.author.id);
+			let rolesToRemove = [];
+			for (let i = 0; i < args.length; i++) {
+				if (isNaN(parseInt(args[i]))) {
+					sendEmbed(message.channel, `Invalid Role ID: ${args[i]} - No roles removed.`, colors.yellow);
+					return;
+				}
+				if (parseInt(args[i]) <= yourParty.rolelist.length && parseInt(args[i]) > 0) {
+					rolesToRemove.push(parseInt(args[i]) - 1);
+				}
+				else {
+					sendEmbed(message.channel, `Invalid Role ID: ${args[i]} - No roles removed.`, colors.yellow);
+					return;
+				}
+			}
+			yourParty.removeRoles(rolesToRemove);
+			sendEmbed(message.channel, `Roles removed!`, colors.aqua);
+		}
+	},
+	{//say
+		names     : [`say`, `s`],
+		desc      : `Talk in the game chat! Used \`.say (MSG)\``,
+		tags      : [`game`, `action`],
+		conditions: [
+			{get: acc.has, message: `You don't have an account! Use the register command`},
+			{get: acc.inGame, message: `You aren't in a game!`},
+			{get: channel.isDM, message: `You can only use this command in a DM channel.`},
+			{get: arg.exists(0), message: `You can't send an empty message!`}
+		],
+		effect    : function (message, args) {
+			let yourGame = Game.findFromPlayerUserID(message.author.id);
+			let yourPlayer = yourGame.playerFromUserID(message.author.id);
+			if (yourGame.phase() === `night`) {
+				sendEmbed(message.author, `You can't talk during the night!`, colors.red);
+				return;
+			}
+			if (!yourPlayer.alive) {
+				sendEmbed(message.author, `You can't talk while dead!`, colors.darkRed);
+				return;
+			}
+			let msg = args.join(` `);
+			if (yourPlayer.silenced) {
+				msg = `I am silenced.`
+			}
+			for (let i = 0; i < yourGame.players.length; i++) {
+				console.log(`i: `,i);
+				yourGame.players[i].send(`**#${yourGame.playerFromUserID(message.author.id).ID}**: ${msg}`, `chat`);
+			}
+			yourGame.chat.push(`**#${yourGame.playerFromUserID(message.author.id).ID}**: ${msg}`);
+			if (yourGame.chat.length > 50) {
+				yourGame.chat.shift();
+			}
+
+		}
+	},
+	{//server
+		names     : [`server`, `support`, `invite`],
+		desc      : `Get a link to MM's official server.`,
+		tags      : [`info`],
+		conditions: [],
+		effect    : function (message, args) {
+			sendEmbed(message.channel, `Here's a link to the Mausoleum Mansion server: https://discord.gg/44M34Sx`, colors.aqua);
+		}
+	},
+	{//start
+		names     : [`start`, `startgame`, `sgame`],
+		desc      : `Start your party's game!`,
+		tags      : [`setup`, `host`, `open`],
+		conditions: [
+			{get: acc.has, message: `You don't have an account! Use the register command`},
+			{get: acc.isHost, message: `You're not the host of a party.`},
+			{get: acc.noGame, message: `You can't use this command while in a game.`}
+		],
+		effect    : function (message, args) {
+			let yourParty = Party.findFromMemberUserID(message.author.id);
+			if (yourParty.rolelist.length !== yourParty.members.length) {
+				sendEmbed(message.channel, `The number of roles must be equal to the number of players to start!`, colors.yellow);
+				return;
+			}
+			let players = [], rlist = yourParty.rolelist.slice();
+			while (yourParty.members.length > 0) {
+				let n = yourParty.members.length;
+				players.push(new Player(Account.findFromID(yourParty.members.splice(Math.floor(Math.random() * yourParty.members.length), 1)[0]), n));
+			}
+			while (yourParty.rolelist.length > 0) {
+				let n = yourParty.rolelist.length - 1;
+				players[n].assignRole(yourParty.rolelist.splice(Math.floor(Math.random() * yourParty.rolelist.length), 1)[0]);
+			}
+
+			let yourGame = new Game(players, rlist);
+			for (let i = 0; i < yourGame.players.length; i++) {
+				yourGame.players[i].send(`The game has started! You are player **#${yourGame.players[i].ID}**, and your role is **${capitalize(yourGame.players[i].rolename)}**.`, `gameStart`);
+			}
+			games.push(yourGame);
+			yourParty.kill();
+			sendEmbed(message.channel, `Party closed, game started!`, colors.green);
+		}
+	},
+	{//tip
+		names     : [`tip`, `knowledgeme`],
+		desc      : `Get a random gameplay tip!`,
+		tags      : [`info`],
+		conditions: [],
+		effect    : function (message, args) {
+			let msgs = [
+				`Mausoleum Mansion help video: www.youtube.com/watch?v=dQw4w9WgXcQ`,
+				`Try using instants along with visits. Instants provide bonuses that set up other cards well, and a good visit can put this to use. Stock up on instants, use a few, play a visit (or two), and you'll find that your investment was worth it`,
+				`Try communicating with your teammates while on the Impostor side. Sending a lot of text in a single whisper, along with saying something like 'do not respond to this' can lead to discrete communication without raising too much suspicion.`,
+				`As a host, add some role groups (like Guest-Investigative instead of Investigator) for some letiety. This makes it so there are more possibilities for who is who, and can add new complexity (and fun) to the game's inherent deception.`,
+				`There are no easter egg commands.`,
+				`The Assassin, though with less defense than the Ringleader, can be even more deadly. He's good at taking out high value targets.`,
+				`The Ringleader is good at creating mass casualties and still having Intellect left over. His defense point helps him, but he's vulnerable to interference from Guest-Protective roles.`,
+				`Have a role to suggest? DM Victorym#2229 to let him know! :)`,
+				`The Prosecutor, though he may seem weak, is a powerful addition to the Impostors. Able to steal cards and learn targets' defense (setting up for other Impostors' kills), as well as upset the balance of power in terms of the vote, the Prosecutor is one of the best utility Impostsors.`,
+				`The Lawyer is a very powerful Guest, contrary to what you may believe. He does well in the shadows, stealing cards with Bribe, but not being a priority kill for the Impostors (like the Investigator). When the game reaches its late stages, his 1-2 bonus votes can make a huge difference, and with the anonymity of voting, it's not hard to escape detection long enough to vote out that last Impostor.`,
+				`The Maw may seem weak because it has a low proportion of killing cards. However, its attacks are among the game's most powerful. Once a high-priority target has identified themselves, drop a Frenzy on them and wipe out their attackers, protectors, and helpers in one fell swoop.`,
+				`The Trickster is a role devoted to confusion. Primarily focused on countering Guest-Investigatives and stealing cards, it can be powerful if used well.`,
+				`Though the Sheriff is arguably weaker than the Investigator, it's much harder for the deceptive roles to mislead him.`,
+				`The Summoner builds up for massive attacks, summoning minions, and throwing them at anything that moves. A subtle fact is that, with the Spawn card (which summons two minions at once), she can have six minions rather than the usual cap of 5.`,
+				`The Apprentice, like a mini-Summoner, nevertheless has major killing potential. With the extremely powerful 'Sponsors' card, she can build up to huge amounts of vote strength multiple times! If the Apprentice can survive until the late game, she can sweep the enemy out of the game with their own precious tool - the trial.`,
+				`Neutral-Benign roles are unique. They don't interfere with any factions' win conditions (Guests and Impostors can win with them) - they simply want to survive until the end of the game.`,
+				`As a Guest-protective, make sure you guard the high-priority Guests! An Investigator eliminated early on can be devastating.`
+			];
+			sendEmbed(message.channel, msgs[Math.floor(Math.random() * msgs.length)], colors.aqua);
+		}
+	},
 	{//vote
 		names     : [`vote`, `v`],
 		desc      : `Vote for someone in-game. Used \`.vote (ID)\``,
@@ -2566,28 +2713,26 @@ let commands = [
 			yourPlayer.vote = parseInt(args[0]);
 		}
 	},
-	{//player
-		names     : [`player`, `gameinfo`, `me`],
-		desc      : `See your in-game summary.`,
-		tags      : [`game`, `info`],
-		conditions: [
-			{get: acc.has, message: `You don't have an account! Use the register command`},
-			{get: acc.inGame, message: `You aren't in a game!`},
-			{get: channel.isDM, message: `You can only use this command in a DM channel.`}
-		],
+	{//wiki
+		names     : [`wiki`, `read`, `github`, `guide`],
+		desc      : `Get a link to the github MM guide`,
+		tags      : [`info`],
+		conditions: [],
 		effect    : function (message, args) {
-			let yourPlayer = Player.findFromUserID(message.author.id);
-			let str = `**#${yourPlayer.ID}** - **${capitalize(yourPlayer.rolename)}**`;
-			if (yourPlayer.role.faction === `impostor`) {
-				str += `\n\nImpostors:`;
-				let yourGame = Game.findFromPlayerID(yourPlayer.account.ID);
-				for (let i = 0; i < yourGame.players.length; i++) {
-					if (yourGame.players[i].role.faction === `impostor`) {
-						str += `\n**#${yourGame.players[i].ID}** - **${yourGame.players[i].rolename}**`;
-					}
-				}
-			}
-			sendEmbed(message.channel, str, colors.purple);
+			let msgs = [
+				`Spicy link for ya: `,
+				`One link, coming right up: `,
+				`Don't click this: `,
+				`Warning! Illegal memes: `,
+				`See you on the other side: `,
+				`I'll be back: `,
+				`The more you know: `,
+				`The more places you'll go: `,
+				`Here be dragons: `,
+				`Click this link to tell the NSA your location: `,
+				`Your FBI agent sends his love: `
+			];
+			sendEmbed(message.channel, `${msgs[Math.floor(Math.random() * msgs.length)]}https://github.com/TemporalFuzz/mausoleum-mansion/wiki`, colors.aqua);
 		}
 	},
 	{//whisper
@@ -2622,120 +2767,7 @@ let commands = [
 			targetPlayer.send(`_**#${yourPlayer.ID}**: ${args.join(` `)}_`, `whisper`);
 		}
 	},
-	{//account
-		names     : [`account`, `myaccount`, `myinfo`, `profile`],
-		desc      : `View your account.`,
-		tags      : [`account`, `info`, `setup`],
-		conditions: [{get: acc.has, message: `You don't have an account! Use the register command`}],
-		effect    : function (message, args) {
-			let yourAccount = Account.findFromUserID(message.author.id);
-			sendEmbed(message.channel, `**#${yourAccount.ID}** - ${yourAccount.gems} 💎 | ${yourAccount.wins}W, ${yourAccount.losses}L | ${yourAccount.getWinrate().toFixed(3)} W/L`, colors.aqua);
-		}
-	},
-	{//cardinfo
-		names     : [`cardinfo`, `card`, `cinfo`],
-		desc      : `See the details of a card. Used \`.cardinfo (CARD)\``,
-		tags      : [`setup`, `info`, `open`],
-		conditions: [{get: arg.exists(0), message: `Invalid card.`}],
-		effect    : function (message, args) {
-			let yourCard = null, yourIndex = null;
-			if (isNaN(parseInt(args[0]))) {
-				for (let i = 0; i < cards.length; i++) {
-					if (cards[i].name === args[0].toLowerCase()) {
-						yourCard = cards[i];
-						yourIndex = i;
-					}
-				}
-			}
-			else if (cards[parseInt(args[0])]) {
-				yourCard = cards[parseInt(args[0])];
-				yourIndex = parseInt(args[0]);
-			}
-			if (yourCard) {
-				sendEmbed(message.channel, `**#${yourIndex} ${capitalize(yourCard.name)}** - ${yourCard.cost} 🎩 - ${(yourCard.instant ? `Instant` : `Visit`) + (yourCard.rare ? ` [RARE]` : ``)}\n${yourCard.desc}`, colors.purple);
-			}
-			else {
-				sendEmbed(message.channel, `Invalid card.`, colors.red);
-			}
-		}
-	},
-	{//wiki
-		names     : [`wiki`, `read`, `github`, `guide`],
-		desc      : `Get a link to the github MM guide`,
-		tags      : [`info`],
-		conditions: [],
-		effect    : function (message, args) {
-			let msgs = [
-				`Spicy link for ya: `,
-				`One link, coming right up: `,
-				`Don't click this: `,
-				`Warning! Illegal memes: `,
-				`See you on the other side: `,
-				`I'll be back: `,
-				`The more you know: `,
-				`The more places you'll go: `,
-				`Here be dragons: `,
-				`Click this link to tell the NSA your location: `,
-				`Your FBI agent sends his love: `
-			];
-			sendEmbed(message.channel, `${msgs[Math.floor(Math.random() * msgs.length)]}https://github.com/TemporalFuzz/mausoleum-mansion/wiki`, colors.aqua);
-		}
-	},
-	{//tip
-		names     : [`tip`, `knowledgeme`],
-		desc      : `Get a random gameplay tip!`,
-		tags      : [`info`],
-		conditions: [],
-		effect    : function (message, args) {
-			let msgs = [
-				`Mausoleum Mansion help video: www.youtube.com/watch?v=dQw4w9WgXcQ`,
-				`Try using instants along with visits. Instants provide bonuses that set up other cards well, and a good visit can put this to use. Stock up on instants, use a few, play a visit (or two), and you'll find that your investment was worth it`,
-				`Try communicating with your teammates while on the Impostor side. Sending a lot of text in a single whisper, along with saying something like 'do not respond to this' can lead to discrete communication without raising too much suspicion.`,
-				`As a host, add some role groups (like Guest-Investigative instead of Investigator) for some letiety. This makes it so there are more possibilities for who is who, and can add new complexity (and fun) to the game's inherent deception.`,
-				`There are no easter egg commands.`,
-				`The Assassin, though with less defense than the Ringleader, can be even more deadly. He's good at taking out high value targets.`,
-				`The Ringleader is good at creating mass casualties and still having Intellect left over. His defense point helps him, but he's vulnerable to interference from Guest-Protective roles.`,
-				`Have a role to suggest? DM Victorym#2229 to let him know! :)`,
-				`The Prosecutor, though he may seem weak, is a powerful addition to the Impostors. Able to steal cards and learn targets' defense (setting up for other Impostors' kills), as well as upset the balance of power in terms of the vote, the Prosecutor is one of the best utility Impostsors.`,
-				`The Lawyer is a very powerful Guest, contrary to what you may believe. He does well in the shadows, stealing cards with Bribe, but not being a priority kill for the Impostors (like the Investigator). When the game reaches its late stages, his 1-2 bonus votes can make a huge difference, and with the anonymity of voting, it's not hard to escape detection long enough to vote out that last Impostor.`,
-				`The Maw may seem weak because it has a low proportion of killing cards. However, its attacks are among the game's most powerful. Once a high-priority target has identified themselves, drop a Frenzy on them and wipe out their attackers, protectors, and helpers in one fell swoop.`,
-				`The Trickster is a role devoted to confusion. Primarily focused on countering Guest-Investigatives and stealing cards, it can be powerful if used well.`,
-				`Though the Sheriff is arguably weaker than the Investigator, it's much harder for the deceptive roles to mislead him.`,
-				`The Summoner builds up for massive attacks, summoning minions, and throwing them at anything that moves. A subtle fact is that, with the Spawn card (which summons two minions at once), she can have six minions rather than the usual cap of 5.`,
-				`The Apprentice, like a mini-Summoner, nevertheless has major killing potential. With the extremely powerful 'Sponsors' card, she can build up to huge amounts of vote strength multiple times! If the Apprentice can survive until the late game, she can sweep the enemy out of the game with their own precious tool - the trial.`,
-				`Neutral-Benign roles are unique. They don't interfere with any factions' win conditions (Guests and Impostors can win with them) - they simply want to survive until the end of the game.`,
-				`As a Guest-protective, make sure you guard the high-priority Guests! An Investigator eliminated early on can be devastating.`
-			];
-			sendEmbed(message.channel, msgs[Math.floor(Math.random() * msgs.length)], colors.aqua);
-		}
-	},
-	{//changeprefix
-		names     : [`changeprefix`, `setprefix`, `prefix`],
-		desc      : `Set the server prefix`,
-		tags      : [`info`, `admin`],
-		conditions: [{
-			get    : clearance.hasPerm(`ADMINISTRATOR`),
-			message: `You must be a server admin to use this command!`
-		}],
-		effect    : function (message, args) {
-			if (args[0].length < 5) {
-				prefixes[message.guild.id] = args[0];
-				sendEmbed(message.channel, `Prefix set to ${args[0]}`, colors.purple);
-				exportPrefixData();
-				return;
-			}
-			sendEmbed(message.channel, `Prefix cannot be over 4 characters.`, colors.red);
-		}
-	},
-	{//server
-		names     : [`server`, `support`, `invite`],
-		desc      : `Get a link to MM's official server.`,
-		tags      : [`info`],
-		conditions: [],
-		effect    : function (message, args) {
-			sendEmbed(message.channel, `Here's a link to the Mausoleum Mansion server: https://discord.gg/44M34Sx`, colors.aqua);
-		}
-	}
+
 	/*{//smokebomb
 	 names: [`smokebomb`, `poof`],
 	 desc: `POOF!`,
@@ -2760,7 +2792,6 @@ let runCommand = function (command, message) {
 	command.effect(message, args);
 	return true;
 };
-
 let getPrefix = function (chan) {
 	if (chan.type !== `text`) {
 		return `.`;
