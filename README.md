@@ -25,6 +25,7 @@ var = let
 ```
 - [x] Fixed bug when game wouldn't announce it was day
 - [ ] Upload Bot to server
-- [x] Change messages to Embeds
-- [ ] Clean up help messages
-- [x] Change how the chat system is Displayed
+- [x] Allow a setting to change messages to Embeds
+- [x] Clean up help messages
+- [x] Change how the chat system is displayed
+- [x] Added a better help system
